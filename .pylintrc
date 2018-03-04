@@ -1,0 +1,4 @@
+[MASTER]
+extension-pkg-whitelist=zmq
+[TYPECHECK]
+generated-members=zmq.PUB,zmq.SUB,zmq.SUBSCRIBE,zmq.PUSH,zmq.PULL
