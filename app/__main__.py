@@ -55,6 +55,7 @@ class View(W.QMainWindow):
     def setup_control_event_handler(self):
         self.control_event_handler = ControlEventHandler.as_thread(self.control, self.command.puller())
         self.control_event_handler.enable.connect(self.on_enable)
+        self.control_event_handler.error.connect(self.on_error)
 
     def on_set_state(self):
         new_state = self.sender().text()
@@ -93,6 +94,7 @@ class ModelEventHandler(Background):
 
 class ControlEventHandler(Background):
     enable = C.pyqtSignal(bool)
+    error = C.pyqtSignal(str)
 
     def __init__(self, control, *args):
         super().__init__(*args)
@@ -106,7 +108,7 @@ class ControlEventHandler(Background):
             try:
                 self.control.set_state(message['state'])
             except ValueError as e:
-                self.control.model.send_error(str(e))
+                self.error.emit(str(e))
             finally:
                 self.enable.emit(True)
         elif message['command'] == 'quit':
@@ -149,15 +151,9 @@ class Model:
     
     def send_system(self, message):
         self.event.send('system', message)
-    
-    def send_error(self, message):
-        self.event.send('error', message)
 
 
 if __name__ == '__main__':
     app = W.QApplication(sys.argv)
-    if len(sys.argv) > 1:
-        main = View()
-    else:
-        main = View()
+    main = View()
     sys.exit(app.exec_())
